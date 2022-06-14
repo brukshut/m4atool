@@ -13,10 +13,7 @@ optional arguments:
   -b BASEDIR, --basedir BASEDIR
                         basedir of files
   -r, --rename          rename
-  --dry-run DRY_RUN
   --album ALBUM         album name
-  --album-artist ALBUM_ARTIST
-                        album artist
   --artist ARTIST       artist name
   --genre GENRE         genre
 ```
@@ -44,6 +41,6 @@ The tags for album, album artist, artist, genre and track titles should use the 
 
 ## Bulk Tag Updates
 
-- The album, album artist, artist, and genre tags can be overridden and updated on all files.
+- The album, artist, and genre tags can be overridden and updated on all files.
 
 
