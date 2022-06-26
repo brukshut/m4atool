@@ -108,24 +108,24 @@ class M4a:
 
 
     def set_album(self, album):
-        """ update several apple lossless tags for album """
+        """Update several apple lossless tags for album."""
         for tag in self.ALBUM, self.ALBUM_SORT_ORDER:
             self.set_tag(tag, album)
 
 
     def set_artist(self, artist):
-        """ update several apple lossless tags for artist """
+        """Update several apple lossless tags for artist."""
         for tag in self.ARTIST, self.ARTIST_SORT_ORDER, self.ALBUM_ARTIST:
             self.set_tag(tag, artist)
 
 
     def set_genre(self, genre):
-        """ update apple lossless tags for genre """
+        """Update apple lossless tags for genre."""
         self.set_tag(self.GENRE, genre)
 
 
 def list_files(basedir, filelist=[]):
-    """ return list of files to manipulate """
+    """Return list of files to manipulate."""
     try:
         files = sorted(os.listdir(basedir))
     except FileNotFoundError:
@@ -180,4 +180,3 @@ def main():
 ## main
 if __name__ == '__main__':
     main()
-
