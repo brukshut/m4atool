@@ -11,6 +11,7 @@ import os
 import re
 import string
 import sys
+import logging
 
 class M4a:
     ## apple lossless tags names
@@ -24,19 +25,23 @@ class M4a:
     TRACK_TITLE = '©nam'
     TRACK_TITLE_SORT_ORDER = 'sonm'
     YEAR = '©day'
-    ## apple lossless file extension
     EXT = '.m4a'
 
-    def __init__(self, filename):
+    def __init__(self, filename, debug=False):
         self.filename = filename
+        self.debug = debug
+
+        log_level = logging.DEBUG if self.debug else logging.INFO
+        logging.basicConfig(level=log_level, format='%(asctime)s %(filename)s %(funcName)s %(message)s')
+
         try:
             self.m4a = mp4.MP4(self.filename)
         except mp4.MP4StreamInfoError:
-            print(f"{self.filename} is not an m4a")
+            logging.info(f"{self.filename} is not an m4a")
 
 
     def rename(self):
-        """ rename m4a file using standard format """
+        """Rename m4a file using standard format."""
         ## sanitize tags before proceeding
         self.sanitize_tags()
         artist = self._sanitize_filename(self.m4a.tags[self.ARTIST][0])
@@ -46,23 +51,23 @@ class M4a:
 
         if not self.filename == new_name:
             try:
-                print(f"renaming {self.filename} to {new_name}")
+                logging.info(f"renaming {self.filename} to {new_name}")
                 os.rename(self.filename, new_name)
             except PermissionError:
-                print(f"cannot rename {self.filename} to {new_name}")
+                logging.info(f"cannot rename {self.filename} to {new_name}")
 
         return new_name
 
 
     def _sanitize_filename(self, tag):
-        """ sanitize filenames for renaming """
+        """Sanitize filenames for renaming."""
         tag = tag.replace(' - ', ' -- ')
         tag = tag.replace('/', ' -- ')
         return tag
 
 
     def _sanitize_tag(self, tag):
-        """ sanitize characters in tag """
+        """Sanitize characters in tag."""
         ## convert square brackets to parentheses
         tag = tag.translate(tag.maketrans('[]', '()'))
         ## capitalize lower case words in tag
@@ -71,30 +76,35 @@ class M4a:
 
 
     def sanitize_tags(self):
-        """ sanitize several tags to follow a consistent format """
-
-        for tag_name in [self.ALBUM, self.ALBUM_SORT_ORDER, self.ALBUM_ARTIST, self.ARTIST, self.ARTIST_SORT_ORDER, self.TRACK_TITLE, self.TRACK_TITLE_SORT_ORDER]:
+        """Sanitize several tags to follow a consistent format."""
+        for tag_name in [self.ALBUM,
+                         self.ALBUM_SORT_ORDER,
+                         self.ALBUM_ARTIST,
+                         self.ARTIST,
+                         self.ARTIST_SORT_ORDER,
+                         self.TRACK_TITLE,
+                         self.TRACK_TITLE_SORT_ORDER]:
           try:
               sanitized = self._sanitize_tag(self.m4a.tags[tag_name][0])
               if not self.m4a.tags[tag_name][0] == sanitized:
                   self.m4a.tags[tag_name][0] = sanitized
 
           except KeyError:
-              print(f"{self.filename} --> {tag_name} not found.")
+              logging.debug(f"{self.filename} {tag_name} not found.")
 
         self.m4a.save()
 
 
     def set_tag(self, tag_name, tag_value):
-        """ override existing tag value """
+        """Override existing tag value."""
         try:
             if not self.m4a.tags[tag_name][0] == tag_value:
-                print(f"{self.filename}: setting {tag_name} to {tag_value}")
+                logging.debug(f"{self.filename}: setting {tag_name} to {tag_value}")
                 self.m4a.tags[tag_name][0] = tag_value
                 self.m4a.save()
 
         except KeyError:
-           print(f"{self.filename} --> {tag_name} not found.")
+           logging.debug(f"{self.filename} {tag_name} not found.")
 
 
     def set_album(self, album):
@@ -141,7 +151,7 @@ def arg_parse():
     parser = argparse.ArgumentParser(description='Directory of encoded files')
     parser.add_argument('--basedir', '-b', required=True, help=f'basedir of files')
     parser.add_argument('--rename', '-r', action='store_true', help=f'rename')
-    parser.add_argument('--dry-run', action='store_true', default=False, help=f'dry run')
+    parser.add_argument('--debug', '-d', action='store_true', default=False, help=f'debug')
     parser.add_argument('--album', default=None, help=f'album name')
     parser.add_argument('--artist', default=None, help=f'artist name')
     parser.add_argument('--genre', default=None, help=f'genre')
@@ -151,8 +161,9 @@ def arg_parse():
 
 def main():
     args = arg_parse()
+
     for file in list_files(args.basedir):
-        m4a = M4a(file)
+        m4a = M4a(file, debug=args.debug)
 
         if args.artist:
             m4a.set_artist(args.artist)
