@@ -1,9 +1,6 @@
 *~
+requirements.txt
 .python-version
-*.pem
-*.crt
-*.key
-*.csr
 *~
 .DS_Store
 
