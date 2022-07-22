@@ -46,24 +46,27 @@ class M4a:
         self.sanitize_tags()
         artist = self._sanitize_filename(self.m4a.tags[self.ARTIST][0])
         track_title = self._sanitize_filename(self.m4a.tags[self.TRACK_TITLE][0])
+        ## pad track number with leading zero if single digit
         track_number = str(self.m4a.tags[self.TRACK_NUMBER][0][0]).zfill(2)
-        new_name = f"{os.path.dirname(self.filename)}/{track_number} {artist} - {track_title}.m4a"
+        new_name = (f"{os.path.dirname(self.filename)}/{track_number} {artist} - {track_title}.m4a")
 
         if not self.filename == new_name:
             try:
                 logging.info(f"renaming {self.filename} to {new_name}")
                 os.rename(self.filename, new_name)
+                self.filename = new_name
+
             except PermissionError:
                 logging.info(f"cannot rename {self.filename} to {new_name}")
 
         return new_name
 
 
-    def _sanitize_filename(self, tag):
-        """Sanitize filenames for renaming."""
-        tag = tag.replace(' - ', ' -- ')
-        tag = tag.replace('/', ' -- ')
-        return tag
+    def _sanitize_filename(self, filename):
+        """Sanitize filename for renaming."""
+        filename = filename.replace(' - ', ' -- ')
+        filename = filename.replace('/', ' -- ')
+        return filename
 
 
     def _sanitize_tag(self, tag):
