@@ -1,6 +1,10 @@
 *~
+__pycache__/
 requirements.txt
 .python-version
 .DS_Store
 *.m4a
-venv
+*.egg-info/*
+build/
+dist/
+venv/
