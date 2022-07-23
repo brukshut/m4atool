@@ -2,7 +2,7 @@ import argparse
 from m4atool import M4a
 import os
 
-def list_files(basedir, filelist=[]):
+def find_m4a_files(basedir, filelist):
     """Return list of files to manipulate."""
     try:
         files = sorted(os.listdir(basedir))
@@ -27,10 +27,10 @@ def list_files(basedir, filelist=[]):
 
 def arg_parse():
     parser = argparse.ArgumentParser(description='Directory of encoded files')
-    parser.add_argument('--basedir', '-b', required=True, help=f'basedir of files')
-    parser.add_argument('--sanitize', '-s', action='store_true', help=f'sanitize tags')
-    parser.add_argument('--rename', '-r', action='store_true', help=f'rename')
+    parser.add_argument('--basedir', '-b', required=True, help=f'base directory containing m4a files')
     parser.add_argument('--debug', '-d', action='store_true', default=False, help=f'debug')
+    parser.add_argument('--rename', '-r', action='store_true', help=f'rename')
+    parser.add_argument('--sanitize', '-s', action='store_true', help=f'sanitize tags')
     parser.add_argument('--album', default=None, help=f'album name')
     parser.add_argument('--artist', default=None, help=f'artist name')
     parser.add_argument('--genre', default=None, help=f'genre')
@@ -40,9 +40,9 @@ def arg_parse():
 
 def main():
     args = arg_parse()
-
-    for file in list_files(args.basedir):
-        m4a = M4a(file, debug=args.debug)
+    filelist = []
+    for m4a_file in find_m4a_files(args.basedir, filelist):
+        m4a = M4a(m4a_file, debug=args.debug)
 
         if args.artist:
             m4a.set_artist(args.artist)
@@ -59,6 +59,6 @@ def main():
         if args.rename:
             m4a.rename()
 
-## main
+
 if __name__ == '__main__':
     main()
