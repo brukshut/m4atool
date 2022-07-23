@@ -1,19 +1,10 @@
-#!/usr/bin/env python
-
-##
-## m4atool.py
-##
-## Utility for manipulating apple lossless metadata.
-##
-import argparse
+import logging
 from mutagen import mp4
-import os
+import pathlib
 import re
 import string
 import shutil
 import sys
-import logging
-import pathlib
 
 class M4a:
     ## apple lossless tags names
@@ -28,6 +19,7 @@ class M4a:
     TRACK_TITLE_SORT_ORDER = 'sonm'
     YEAR = '©day'
     EXT = '.m4a'
+
 
     def __init__(self, filename, debug=False):
         self.filename =  str(pathlib.Path(filename).resolve())
@@ -50,7 +42,6 @@ class M4a:
 
         artist = self.m4a.tags[self.ARTIST][0]
         track_title = self.m4a.tags[self.TRACK_TITLE][0]
-
         ## pad track number with leading zero if single digit
         track_number = str(self.m4a.tags[self.TRACK_NUMBER][0][0]).zfill(2)        
         return f"{self.basedir}/{track_number} {artist} - {track_title}.m4a"
@@ -62,7 +53,7 @@ class M4a:
         if not self.filename == newname:
             try:
                 logging.info(f"renaming {self.filename} to {newname}")
-                os.rename(self.filename, newname)
+                shutil.move(self.filename, newname)
                 self.filename = newname
 
             except PermissionError:
@@ -126,65 +117,3 @@ class M4a:
     def set_genre(self, genre: str) -> None:
         """Update apple lossless tags for genre."""
         self.set_tag(self.GENRE, genre)
-
-
-def list_files(basedir, filelist=[]):
-    """Return list of files to manipulate."""
-    try:
-        files = sorted(os.listdir(basedir))
-    except FileNotFoundError:
-        sys.exit(f"{basedir} does not exist")
-    except NotADirectoryError:
-        sys.exit(f"{basedir} is not a directory")
-
-    for file in files:
-        ## preserve basedir in filename        
-        file = f"{basedir}/{file}"
-        if not os.path.isdir(file):
-            if os.path.splitext(file)[1] == M4a.EXT:
-                filelist.append(file)
-
-        ## if we are a directory, recurse
-        elif os.path.isdir(file):
-            filelist = list_files(file, filelist)
-
-    return filelist  
-
-
-def arg_parse():
-    parser = argparse.ArgumentParser(description='Directory of encoded files')
-    parser.add_argument('--basedir', '-b', required=True, help=f'basedir of files')
-    parser.add_argument('--sanitize', '-s', action='store_true', help=f'sanitize tags')
-    parser.add_argument('--rename', '-r', action='store_true', help=f'rename')
-    parser.add_argument('--debug', '-d', action='store_true', default=False, help=f'debug')
-    parser.add_argument('--album', default=None, help=f'album name')
-    parser.add_argument('--artist', default=None, help=f'artist name')
-    parser.add_argument('--genre', default=None, help=f'genre')
-    args = parser.parse_args()
-    return args
-
-
-def main():
-    args = arg_parse()
-
-    for file in list_files(args.basedir):
-        m4a = M4a(file, debug=args.debug)
-
-        if args.artist:
-            m4a.set_artist(args.artist)
-
-        if args.sanitize:
-            m4a.sanitize_tags()
-
-        if args.album:
-           m4a.set_album(args.album)
-
-        if args.genre:
-           m4a.set_genre(args.genre)
-
-        if args.rename:
-            m4a.rename()
-
-## main
-if __name__ == '__main__':
-    main()

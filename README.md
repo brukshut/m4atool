@@ -14,6 +14,29 @@ Collecting mutagen==1.45.1
 Installing collected packages: mutagen
 Successfully installed mutagen-1.45.1
 ```
+
+## Installation
+```
+[shiloh.local:~/Desktop/workspace/m4atool] brukshut% pip install .
+Processing /Users/brukshut/Desktop/workspace/m4atool
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Installing backend dependencies ... done
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: mutagen in /Users/brukshut/.pyenv/versions/3.9.11/lib/python3.9/site-packages (from m4atool==0.0.1) (1.45.1)
+Building wheels for collected packages: m4atool
+  Building wheel for m4atool (pyproject.toml) ... done
+  Created wheel for m4atool: filename=m4atool-0.0.1-py3-none-any.whl size=5940 sha256=63b10a10d279a3af0e64b2d640b283d737303908a7c44371dd1f0bcec6db6c18
+  Stored in directory: /private/var/folders/pr/h3bb2fjs7kzfc2tjhtw237ww0000gn/T/pip-ephem-wheel-cache-c2_4nxcb/wheels/23/ca/56/cf0f084c9ce7597e868ffd7cce73942d902c907ed5a84bcd83
+Successfully built m4atool
+Installing collected packages: m4atool
+  Attempting uninstall: m4atool
+    Found existing installation: m4atool 0.0.1
+    Uninstalling m4atool-0.0.1:
+      Successfully uninstalled m4atool-0.0.1
+Successfully installed m4atool-0.0.1
+```
+
 ## Usage
 ```
 user% ./m4atool.py
