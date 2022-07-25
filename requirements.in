@@ -1,1 +1,3 @@
 mutagen
+flake8
+black
