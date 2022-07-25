@@ -25,10 +25,22 @@ class M4ATestCase(unittest.TestCase):
         os.remove(filename)
 
     def test_sanitize_tag(self):
-        """Test sanitization of tag."""
+        """Test sanitization of dash and blackslash characters in tags."""
         lossless = self.get_lossless()
         dirty_tag = "speak For the earth [live on WFMU]"
         clean_tag = "Speak For The Earth (Live On WFMU)"
+        self.assertEqual(lossless.sanitize_tag(dirty_tag), clean_tag)
+        words = ["foo - bar ", "foo -bar", "foo/bar", "foo // bar", "foo -- bar"]
+        for word in words:
+            self.assertEqual(lossless.sanitize_tag(word), "Foo -- Bar")
+
+        self.cleanup(lossless.filename)
+
+    def test_sanitize_tag_backslash(self):
+        """Test sanitization of square brackets in tag."""
+        lossless = self.get_lossless()
+        dirty_tag = "speak For the earth [demo/WFMU]"
+        clean_tag = "Speak For The Earth (Demo -- WFMU)"
         self.assertEqual(lossless.sanitize_tag(dirty_tag), clean_tag)
         self.cleanup(lossless.filename)
 
