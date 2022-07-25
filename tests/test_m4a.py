@@ -32,6 +32,7 @@ class M4ATestCase(unittest.TestCase):
         self.assertEqual(lossless.sanitize_tag(dirty_tag), clean_tag)
         words = ["foo - bar ", "foo -bar", "foo/bar", "foo // bar", "foo -- bar"]
         for word in words:
+            print(f"{word} --> {lossless.sanitize_tag(word)}")
             self.assertEqual(lossless.sanitize_tag(word), "Foo -- Bar")
 
         self.cleanup(lossless.filename)
@@ -41,6 +42,7 @@ class M4ATestCase(unittest.TestCase):
         lossless = self.get_lossless()
         dirty_tag = "speak For the earth [demo/WFMU]"
         clean_tag = "Speak For The Earth (Demo -- WFMU)"
+        print(f"{dirty_tag} --> {clean_tag}")
         self.assertEqual(lossless.sanitize_tag(dirty_tag), clean_tag)
         self.cleanup(lossless.filename)
 
