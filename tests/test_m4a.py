@@ -8,7 +8,6 @@ import unittest
 
 
 class M4ATestCase(unittest.TestCase):
-    unittest.TestLoader.sortTestMethodsUsing = None
     test_m4a = "go-speak-for-the-earth.m4a"
 
     def setUp(self):

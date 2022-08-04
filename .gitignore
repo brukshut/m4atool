@@ -4,7 +4,9 @@ requirements.txt
 .python-version
 .DS_Store
 *.m4a
-*.egg-info/*
+*.egg-info/
+.vscode/
+.mypy_cache/
 build/
 dist/
 venv/

@@ -6,7 +6,10 @@ import shutil
 
 
 class M4a:
-    # apple lossless tags names
+    """Provides functions for manipulating tags and filenames
+    of Apple Lossless files with an .m4a extension."""
+
+    # Apple Lossless tag names.
     ALBUM = "©alb"
     ALBUM_SORT_ORDER = "soal"
     ALBUM_ARTIST = "aART"
@@ -34,8 +37,14 @@ class M4a:
             logging.info(f"{self.filename} is not an m4a")
 
     def generate_filename(self) -> str:
-        """Generate new filename from existing tags."""
-        # Tags must be sanitized to ensure reasonable filenames.
+        """Generate new filename from existing tags. Returns str.
+
+        The filename is sanitized to remove any filesystem special characters.
+        By default, The generated filename uses the following format:
+        [track_number] [artist] - [track_title]
+
+        Returns:
+            str: new filename"""
         self.sanitize_tags()
         artist = self.m4a.tags[self.ARTIST][0]
         track_title = self.m4a.tags[self.TRACK_TITLE][0]
@@ -44,7 +53,11 @@ class M4a:
         return f"{self.basedir}/{track_number} {artist} - {track_title}.m4a"
 
     def rename(self) -> str:
-        """Rename m4a lossless file."""
+        """Rename m4a file using name generated from existing tags.
+
+        Returns:
+            str: new filename
+        """
         newname = self.generate_filename()
         if not self.filename == newname:
             try:
@@ -61,9 +74,24 @@ class M4a:
         return newname
 
     def sanitize_tag(self, tag: str) -> str:
-        """Sanitize characters in tag."""
-        # This sequence is used as a separator to replace certain characters.
+        """Sanitize characters in tag. Returns string.
+
+        Ensures that tags follow a consistent format.
+        Converts all words in tag to upper case.
+        Removes special filesystem characters if present.
+        Converts square brackets to parentheses.
+        Backslashes and whitespace padded dashes are
+        converted to double emphasis unicode character.
+        Example: Devil Doll (Demo/Remix Version).m4a
+        becomes Devil Doll (Demo \u2014 Remix Version).m4a
+
+        Returns:
+            str: sanitized tag
+        """
+
+        # The em dash is used as separator character.
         separator = " -- "
+        # em_dash = "\u2014"
 
         # Replace single dash with whitespace padding.
         dash_rgx = re.compile(r"(?<=[^-]{1,1})\s+-\s*(?=[^-]+)")
@@ -104,7 +132,7 @@ class M4a:
                 logging.debug(f"{self.filename} tag name {tag_name} not found")
 
     def set_tag(self, tag_name: str, tag_value: str) -> None:
-        """Override existing tag value."""
+        """Update existing tag value."""
         try:
             if not self.m4a.tags[tag_name][0] == tag_value:
                 log_message = f"{self.filename}: set {tag_name} to {tag_value}"

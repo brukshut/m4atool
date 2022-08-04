@@ -1,49 +1,55 @@
 import argparse
 from m4atool import M4a
-import os
+from pathlib import Path
+from typing import Generator
 import sys
 
 
-def find_m4a_files(basedir, filelist):
-    """Return list of files to manipulate."""
+def find_m4a_files(basedir) -> Generator[Path, None, None]:
+    """Recurses a base directory and returns a generator
+    representing a list of m4a files."""
     try:
-        files = sorted(os.listdir(basedir))
+        return Path(basedir).rglob("*.m4a")
+
     except FileNotFoundError:
         sys.exit(f"{basedir} does not exist")
     except NotADirectoryError:
         sys.exit(f"{basedir} is not a directory")
 
-    for file in files:
-        # preserve basedir in filename
-        file = f"{basedir}/{file}"
-        if not os.path.isdir(file):
-            if os.path.splitext(file)[1] == M4a.EXT:
-                filelist.append(file)
-
-        # if we are a directory, recurse
-        elif os.path.isdir(file):
-            filelist = find_m4a_files(file, filelist)
-
-    return filelist
-
 
 def arg_parse():
-    prs = argparse.ArgumentParser(description="Directory of encoded files")
-    prs.add_argument("--basedir", "-b", required=True, help="base directory")
-    prs.add_argument("--debug", "-d", action="store_true", default=False, help="debug")
-    prs.add_argument("--rename", "-r", action="store_true", help="rename")
-    prs.add_argument("--sanitize", "-s", action="store_true", help="sanitize tags")
-    prs.add_argument("--album", default=None, help="album name")
-    prs.add_argument("--artist", default=None, help="artist name")
-    prs.add_argument("--genre", default=None, help="genre")
-    args = prs.parse_args()
+    parser = argparse.ArgumentParser(description="Directory of encoded files")
+    parser.add_argument("--basedir", "-b", default=None, help="base directory")
+    parser.add_argument(
+        "--debug", "-d", action="store_true", default=False, help="debug"
+    )
+    parser.add_argument("--filename", "-f", default=None, help="filename")
+    parser.add_argument("--rename", "-r", action="store_true", help="rename")
+    parser.add_argument("--sanitize", "-s", action="store_true", help="sanitize tags")
+    parser.add_argument("--album", default=None, help="album name")
+    parser.add_argument("--artist", default=None, help="artist name")
+    parser.add_argument("--genre", default=None, help="genre")
+
+    args = parser.parse_args()
+    if args.basedir is None and args.filename is None:
+        parser.error("Please specify --basedir or --filename.")
+
+    if args.basedir and args.filename:
+        parser.error("Please specify --basedir or --filename.")
+
     return args
 
 
 def main():
     args = arg_parse()
-    filelist = []
-    for m4a_file in find_m4a_files(args.basedir, filelist):
+
+    if args.basedir:
+        m4a_files = find_m4a_files(args.basedir)
+
+    if args.filename:
+        m4a_files = [args.filename]
+
+    for m4a_file in m4a_files:
         m4a = M4a(m4a_file, debug=args.debug)
 
         if args.artist:
