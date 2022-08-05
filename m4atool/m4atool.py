@@ -44,7 +44,8 @@ class M4a:
         [track_number] [artist] - [track_title]
 
         Returns:
-            str: new filename"""
+            str: new filename
+        """
         self.sanitize_tags()
         artist = self.m4a.tags[self.ARTIST][0]
         track_title = self.m4a.tags[self.TRACK_TITLE][0]

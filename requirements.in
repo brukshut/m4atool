@@ -2,3 +2,4 @@ mutagen==1.45.1
 flake8==4.0.1
 black==22.6.0
 mypy==0.971
+pyfakefs==4.6.3
