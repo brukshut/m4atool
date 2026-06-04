@@ -1,8 +1,12 @@
+"""CLI entry point for m4atool."""
 import argparse
-from m4atool import M4a
+import logging
+import sys
 from pathlib import Path
 from typing import Generator
-import sys
+
+from mutagen import MutagenError  # pylint: disable=import-error
+from m4atool import M4a
 
 
 def find_m4a_files(basedir) -> Generator[Path, None, None]:
@@ -18,6 +22,7 @@ def find_m4a_files(basedir) -> Generator[Path, None, None]:
 
 
 def arg_parse():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="Directory of encoded files")
     parser.add_argument("--basedir", "-b", default=None, help="base directory")
     parser.add_argument(
@@ -41,16 +46,23 @@ def arg_parse():
 
 
 def main():
+    """Process m4a files according to command-line arguments."""
     args = arg_parse()
 
     if args.basedir:
         m4a_files = find_m4a_files(args.basedir)
-
-    if args.filename:
+    else:
         m4a_files = [args.filename]
 
     for m4a_file in m4a_files:
-        m4a = M4a(m4a_file, debug=args.debug)
+        if not Path(m4a_file).exists():
+            logging.warning("skipping %s: file not found", m4a_file)
+            continue
+        try:
+            m4a = M4a(m4a_file, debug=args.debug)
+        except (OSError, MutagenError) as e:
+            logging.warning("skipping %s: %s", m4a_file, e)
+            continue
 
         if args.artist:
             m4a.set_artist(args.artist)
