@@ -1,8 +1,10 @@
+"""Functions for manipulating M4A file tags and filenames."""
 import logging
-from mutagen import mp4
 import pathlib
 import re
 import shutil
+
+from mutagen import mp4  # pylint: disable=import-error
 
 
 class M4a:
@@ -31,10 +33,8 @@ class M4a:
         log_format = "%(asctime)s %(filename)s %(funcName)s %(message)s"
         logging.basicConfig(level=log_level, format=log_format)
 
-        try:
-            self.m4a = mp4.MP4(self.filename)
-        except mp4.MP4StreamInfoError:
-            logging.info(f"{self.filename} is not an m4a")
+        self.m4a = mp4.MP4(self.filename)
+
 
     def generate_filename(self) -> str:
         """Generate new filename from existing tags. Returns str.
@@ -53,6 +53,7 @@ class M4a:
         track_number = str(self.m4a.tags[self.TRACK_NUMBER][0][0]).zfill(2)
         return f"{self.basedir}/{track_number} {artist} - {track_title}.m4a"
 
+
     def rename(self) -> str:
         """Rename m4a file using name generated from existing tags.
 
@@ -62,17 +63,18 @@ class M4a:
         newname = self.generate_filename()
         if not self.filename == newname:
             try:
-                logging.info(f"renaming {self.filename} to {newname}")
+                logging.info("renaming %s to %s", self.filename, newname)
                 shutil.move(self.filename, newname)
                 self.filename = newname
 
             except FileNotFoundError:
-                logging.debug(f"{newname} not found")
+                logging.debug("%s not found", newname)
 
             except PermissionError:
-                logging.debug(f"cannot rename {self.filename} to {newname}")
+                logging.debug("cannot rename %s to %s", self.filename, newname)
 
         return newname
+
 
     def sanitize_tag(self, tag: str) -> str:
         """Sanitize characters in tag. Returns string.
@@ -114,6 +116,7 @@ class M4a:
         )
         return tag
 
+
     def sanitize_tags(self) -> None:
         """Sanitize several tags to follow a consistent format."""
         tag_names = (
@@ -130,7 +133,8 @@ class M4a:
                 clean_tag = self.sanitize_tag(self.m4a.tags[tag_name][0])
                 self.set_tag(tag_name, clean_tag)
             except KeyError:
-                logging.debug(f"{self.filename} tag name {tag_name} not found")
+                logging.debug("%s tag name %s not found", self.filename, tag_name)
+
 
     def set_tag(self, tag_name: str, tag_value: str) -> None:
         """Update existing tag value."""
@@ -142,17 +146,20 @@ class M4a:
                 self.m4a.save()
 
         except KeyError:
-            logging.debug(f"{self.filename} {tag_name} not found.")
+            logging.debug("%s %s not found.", self.filename, tag_name)
+
 
     def set_album(self, album: str) -> None:
         """Update several apple lossless tags for album."""
         for tag in self.ALBUM, self.ALBUM_SORT_ORDER:
             self.set_tag(tag, album)
 
+
     def set_artist(self, artist: str) -> None:
         """Update several apple lossless tags for artist."""
         for tag in self.ARTIST, self.ARTIST_SORT_ORDER, self.ALBUM_ARTIST:
             self.set_tag(tag, artist)
+
 
     def set_genre(self, genre: str) -> None:
         """Update apple lossless tags for genre."""
